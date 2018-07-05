@@ -357,6 +357,13 @@ void PotreeConverter::convert(){
 	long long pointsProcessed = 0;
 
 	AABB aabb = calculateAABB();
+	double cx = (aabb.min.x + aabb.max.x)/2;
+	double cy = (aabb.min.y + aabb.max.y)/2;
+	double cz = (aabb.min.z + aabb.max.z)/2;
+	offset = Vector3<double>(cx, cy, cz);
+	aabb.min = aabb.min - offset;
+	aabb.max = aabb.max - offset;
+
 	cout << "AABB: " << endl << aabb << endl;
 	aabb.makeCubic();
 	cout << "cubic AABB: " << endl << aabb << endl;
@@ -409,7 +416,10 @@ void PotreeConverter::convert(){
 
 		PointReader *reader = createPointReader(source, pointAttributes);
 
-		boundingBoxes.push_back(reader->getAABB());
+		AABB bb = reader->getAABB();
+		bb.min = bb.min - offset;
+		bb.max = bb.max - offset;
+		boundingBoxes.push_back(bb);
 		numPoints.push_back(reader->numPoints());
 		sourceFilenames.push_back(fs::path(source).filename().string());
 
@@ -425,6 +435,7 @@ void PotreeConverter::convert(){
 			pointsProcessed++;
 
 			Point p = reader->getPoint();
+			p.position = p.position - offset;
 			writer->add(p);
 
 			if((pointsProcessed % (1'000'000)) == 0){

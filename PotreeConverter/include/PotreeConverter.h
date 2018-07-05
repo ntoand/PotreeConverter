@@ -23,6 +23,7 @@ class PotreeConverter{
 
 private:
 	AABB aabb;
+	Vector3<double> offset;
 	vector<string> sources;
 	string workDir;
 	CloudJS cloudjs;
