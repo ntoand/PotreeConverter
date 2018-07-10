@@ -23,7 +23,6 @@ class PotreeConverter{
 
 private:
 	AABB aabb;
-	Vector3<double> offset;
 	vector<string> sources;
 	string workDir;
 	CloudJS cloudjs;
@@ -57,6 +56,8 @@ public:
 	bool showSkybox = false;
 	string material = "RGB";
     string executablePath;
+	bool hasOffset = false;
+	Vector3<double> offset;
 
     PotreeConverter(string executablePath, string workDir, vector<string> sources);
 		

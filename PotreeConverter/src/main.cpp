@@ -6,6 +6,7 @@
 #include <exception>
 #include <fstream>
 
+#include "Vector3.h"
 #include "AABB.h"
 #include "PotreeConverter.h"
 #include "PotreeException.h"
@@ -64,6 +65,8 @@ struct PotreeArguments {
 	bool showSkybox = false;
 	string material = "RGB";
     string executablePath;
+	bool hasOffset = false;
+	Potree::Vector3<double> offset = Potree::Vector3<double>(0, 0, 0);
 };
 
 PotreeArguments parseArguments(int argc, char **argv){
@@ -95,6 +98,7 @@ PotreeArguments parseArguments(int argc, char **argv){
 	args.addArgument("edl-enabled", "Enable Eye-Dome-Lighting.");
 	args.addArgument("show-skybox", "");
 	args.addArgument("material", "RGB, ELEVATION, INTENSITY, INTENSITY_GRADIENT, CLASSIFICATION, RETURN_NUMBER, SOURCE, LEVEL_OF_DETAIL");
+	args.addArgument("offset", "offset X, Y, Z");
 
 	PotreeArguments a;
 
@@ -229,6 +233,27 @@ PotreeArguments parseArguments(int argc, char **argv){
 		exit(1);
 	}
 
+	// offset
+	if(args.has("offset")) {
+		string strOffset = args.get("offset").as<string>();
+		vector<double> offsetValues;
+		char sep = ' ';
+		for (size_t p = 0, q = 0; p != strOffset.npos; p = q)
+			offsetValues.push_back(atof(strOffset.substr(p + (p != 0), (q = strOffset.find(sep, p + 1)) - p - (p != 0)).c_str()));
+
+		if (offsetValues.size() != 3) {
+			cerr << "Offset requires 3 arguments" << endl;
+			exit(1);
+		}
+
+		a.hasOffset = true;
+		a.offset = Potree::Vector3<double>(offsetValues[0], offsetValues[1], offsetValues[2]);
+	}
+	else {
+		a.hasOffset = false;
+		a.offset = Potree::Vector3<double>(0, 0, 0);
+	}
+
 	// set default parameters 
 	fs::path pSource(a.source[0]);
 	a.outdir = args.has("outdir") ? args.get("outdir").as<string>() : pSource.generic_string() + "_converted";
@@ -266,6 +291,7 @@ void printArguments(PotreeArguments &a){
 		cout << "scale:             \t" << a.scale << endl;
 		cout << "pageName:          \t" << a.pageName << endl;
 		cout << "projection:        \t" << a.projection << endl;
+		cout << "offset				\t" << a.offset << endl;
 		cout << endl;
 	}catch(exception &e){
 		cout << "ERROR: " << e.what() << endl;
@@ -308,6 +334,8 @@ int main(int argc, char **argv){
 		pc.edlEnabled = a.edlEnabled;
 		pc.material = a.material;
 		pc.showSkybox = a.showSkybox;
+		pc.hasOffset = a.hasOffset;
+		pc.offset = a.offset;
 
 		pc.convert();
 	}catch(exception &e){

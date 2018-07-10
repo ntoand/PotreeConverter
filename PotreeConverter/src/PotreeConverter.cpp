@@ -357,10 +357,14 @@ void PotreeConverter::convert(){
 	long long pointsProcessed = 0;
 
 	AABB aabb = calculateAABB();
-	double cx = (aabb.min.x + aabb.max.x)/2;
-	double cy = (aabb.min.y + aabb.max.y)/2;
-	double cz = (aabb.min.z + aabb.max.z)/2;
-	offset = Vector3<double>(cx, cy, cz);
+
+	if(!hasOffset) {
+		double cx = (aabb.min.x + aabb.max.x)/2;
+		double cy = (aabb.min.y + aabb.max.y)/2;
+		double cz = (aabb.min.z + aabb.max.z)/2;
+		offset = Vector3<double>(cx, cy, cz);
+	}
+	cout << "convert offset " << offset << endl;
 	aabb.min = aabb.min - offset;
 	aabb.max = aabb.max - offset;
 
